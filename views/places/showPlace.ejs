@@ -1,0 +1,36 @@
+<% layout('layouts/app') %>
+<div class="row mb-3">
+  <div class="col-6 offset-3">
+    <div class="card">
+      <img
+        src="<%= places.image %>"
+        alt="<%= places.title %>"
+        class="card-image-top" />
+      <div class="card-body">
+        <h5 class="card-title"><%= places.title %></h5>
+        <p class="card-text"><%= places.description %></p>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><%= places.location %></li>
+        <% if(places.price == 0){ %>
+        <li class="list-group-item">Gratis</li>
+        <% }else{ %>
+        <li class="list-group-item">Rp. <%= places.price %></li>
+        <% } %>
+      </ul>
+      <div class="card-body">
+        <a
+          href="/places/edit/<%= places._id %>"
+          class="btn btn-warning text-white card-link"
+          >Edit</a
+        >
+        <form
+          action="/places/deletePlace/<%= places._id %>?_method=DELETE"
+          method="post"
+          style="display: inline !important">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
