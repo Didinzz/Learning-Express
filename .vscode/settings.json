@@ -1,0 +1,18 @@
+{
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features",
+        "prettier.printWidth": 200
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "prettier.printWidth": 120
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "prettier.printWidth": 120
+    },
+    "editor.defaultFormatter": "mblode.pretty-formatter",
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    }
+}

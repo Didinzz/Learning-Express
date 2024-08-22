@@ -4,128 +4,90 @@ const mongoose = require("mongoose");
 const path = require("path");
 const app = express();
 const methodOverride = require("method-override");
-const Joi = require("joi");
+const passport = require("passport");
+const localStrategy = require("passport-local");
+const User = require("./model/user");
+
+
+// !! import session flash
+const session = require("express-session");
+const flash = require("connect-flash");
 
 // !! import middleware error handler
-const ErrorHandler = require("./utils/errorHandler");
-const wrapAsync = require("./utils/wrapAsync");
+const ExpressError = require("./utils/ExpressError");
 
-// !! models Import
-const Place = require("./model/place");
-
-mongoose
-  .connect("mongodb://localhost:27017/bestpoints")
-  .then((result) => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
+// !! set up view engine
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// !! Middleware
+// !!  set upMiddleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(session({
+    secret: "kucing-Garong",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    }
+}))
+app.use(flash());
+
+// !! passport
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser()); // proses passport menyimpan hasil authentikasi diatas didalam passport session yang nanti mengecek middleware user sudah login atau belum
+passport.deserializeUser(User.deserializeUser()); // proses passport mengambil data dari yang sudah disimpan oleh serializeUser yang disimpan didalam session 
+
+// !! set global session
+app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+})
+// !! end setup global session
+
 // !! Routes
 app.get("/", (req, res) => {
-  res.render("home");
-});
-// app.get("/errorTemplate", (req, res) => {
-//   res.render("error");
-// });
-app.get(
-  "/places",
-  wrapAsync(async (req, res) => {
-    const places = await Place.find();
-    res.render("places/index", { places });
-  })
-);
-
-app.get("/places/create", (req, res) => {
-  res.render("places/createPlace");
+    res.render("home");
 });
 
-app.post(
-  "/places/store",
-  wrapAsync(async (req, res, next) => {
-    const placeSchema = Joi.object({
-      place: Joi.object({
-        title: Joi.string().required(),
-        price: Joi.number().required(),
-        description: Joi.string().required(),
-        location: Joi.string().required(),
-        image: Joi.string().required(),
-      }).required(),
-    });
+// !! route import
+const placeRoutes = require("./routes/place.routes");
+const reviewRoutes = require("./routes/review.routes");
+const authRoutes = require("./routes/auth.routes");
 
-    const { error } = placeSchema.validate(req.body);
-    if (error) {
-      console.log(error);
-      return next(new ErrorHandler(error.details[0].message, 400));
-    }
-
-    const places = new Place(req.body.place);
-    await places.save();
-    res.redirect("/places");
-    next();
-  })
-);
-
-app.get(
-  "/places/:id",
-  wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    const places = await Place.findById(id);
-    res.render("places/showPlace", { places });
-  })
-);
-
-app.get(
-  "/places/edit/:id",
-  wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    const places = await Place.findById(id);
-    res.render("places/editPlace", { places });
-  })
-);
-
-app.put(
-  "/places/updatePlace/:id",
-  wrapAsync(async (req, res) => {
-    const { id } = req.params;
-    const places = await Place.findByIdAndUpdate(id, { ...req.body.place });
-    res.redirect(`/places/${places._id}`);
-  })
-);
-
-app.delete(
-  "/places/deletePlace/:id",
-  wrapAsync(async (req, res) => {
-    const deletePlaces = await Place.findByIdAndDelete(req.params.id);
-    if (deletePlaces) {
-      console.log("deleted");
-      res.redirect("/places");
-    } else {
-      console.log("Something went wrong");
-    }
-  })
-);
+app.use("/places", placeRoutes);
+app.use('/places/:place_id/reviews', reviewRoutes);
+app.use(authRoutes);
 
 app.all("*", (req, res, next) => {
-  next(new ErrorHandler("Page Not Found", 404));
+    next(new ExpressError("Page Not Found", 404));
 });
 
 // !! middleware error
 app.use((err, req, res, next) => {
-  const { statusCode = 500 } = err;
-  if (!err.message) err.message = "Something went wrong";
-  res.status(statusCode).render("error", { err });
+    const {
+        statusCode = 500
+    } = err;
+    if (!err.message)
+        err.message = "Something went wrong";
+    res.status(statusCode).render("error", { err });
+}
+);
+
+// !! connect mongoose
+mongoose.connect("mongodb://localhost:27017/bestpoints").then((result) => {
+    console.log("Connected to MongoDB");
+}).catch((err) => {
+    console.log(err);
 });
 
-app.listen("5000", () =>
-  console.log("Listening on port http://localhost:5000")
-);
+app.listen("5000", () => console.log("Listening on port http://localhost:5000"),);

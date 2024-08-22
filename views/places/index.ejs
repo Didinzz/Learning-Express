@@ -6,14 +6,15 @@
 <div class="d-flex flex-wrap">
   <% for(const place of places) {%>
   <div class="card my-3 mx-2" style="width: 18rem">
-    <img
-      src="<%= place.image %>"
-      class="card-img-top"
-      style="max-height: 150px"
-      alt="..." />
+    <% if(place.images.length > 0) { %>
+    <img src="/image/<%= place.images[0].filename %>" class="img-fluid" alt="">
+    <% }else{ %>
+      <img src="https://picsum.photos/1280/720?nature" class="img-fluid" alt="">
+      <% } %>
     <div class="card-body d-flex flex-column">
       <h5 class="card-title"><%= place.title %></h5>
       <span>Rp. <%= place.price %></span>
+      <span>📍<%= place.location %></span>
       <p class="card-text"><%= place.description %></p>
       <a href="/places/<%= place._id %>" class="btn btn-primary mt-auto w-100"
         >Detail</a

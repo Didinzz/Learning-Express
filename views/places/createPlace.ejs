@@ -1,93 +1,37 @@
 <% layout('layouts/app') %>
-<h1 class="text-center">Add A New Place</h1>
-<div class="col-6 offset-3">
-  <form
-    action="/places/storePlace"
-    method="post"
-    class="validate-form"
-    novalidate>
-    <div class="mb-3">
-      <label class="form-label" for="">Title Location</label>
-      <input
-        type="text"
-        name="place[title]"
-        id=""
-        class="form-control"
-        required />
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="price" class="form-control">Price</label>
-      <input
-        type="text"
-        name="place[price]"
-        value=""
-        class="form-control"
-        required />
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="image">Location</label>
-      <input
-        type="text"
-        name="place[location]"
-        value=""
-        class="form-control"
-        required />
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="image">Image</label>
-      <input
-        type="text"
-        name="place[image]"
-        value=""
-        class="form-control"
-        required />
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="description">Description</label>
-      <textarea
-        name="place[description]"
-        id=""
-        cols="30"
-        rows="10"
-        class="form-control"
-        required></textarea>
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
-    </div>
-    <button type="submit" class="btn btn-success mt-3">Submit</button>
-  </form>
-</div>
-
-<script>
-  // Example starter JavaScript for disabling form submissions if there are invalid fields
-  (() => {
-    "use strict";
-
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-    const forms = document.querySelectorAll(".validate-form");
-
-    // Loop over them and prevent submission
-    Array.from(forms).forEach((form) => {
-      form.addEventListener(
-        "submit",
-        (event) => {
-          if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-
-          form.classList.add("was-validated");
-        },
-        false
-      );
-    });
-  })();
-</script>
+  <h1 class="text-center">Add A New Place</h1>
+  <div class="col-6 offset-3">
+    <form action="/places/store" method="post" enctype="multipart/form-data" class="validate-form" novalidate>
+      <div class="mb-3">
+        <label class="form-label" for="">Title Location</label>
+        <input type="text" name="place[title]" id="" class="form-control" required />
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">Please fill out this field.</div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="price" class="form-control">Price</label>
+        <input type="text" name="place[price]" value="" class="form-control" required />
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">Please fill out this field.</div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="image">Location</label>
+        <input type="text" name="place[location]" value="" class="form-control" required />
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">Please fill out this field.</div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="image">Image</label>
+        <input type="file" name="image" class="form-control" required accept="image/*" multiple/>
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">Please fill out this field.</div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="description">Description</label>
+        <textarea name="place[description]" id="" cols="30" rows="5" class="form-control" required></textarea>
+        <div class="valid-feedback">Looks good!</div>
+        <div class="invalid-feedback">Please fill out this field.</div>
+      </div>
+      <button type="submit" class="btn btn-success mt-3">Submit</button>
+    </form>
+  </div>

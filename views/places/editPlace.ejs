@@ -1,96 +1,80 @@
 <% layout('layouts/app') %>
-<h1 class="text-center">Add A New Place</h1>
-<div class="col-6 offset-3">
-  <form
-    class="validate-form"
-    novalidate
-    action="/places/updatePlace/<%= places._id %>?_method=PUT"
-    method="post">
-    <div class="mb-3">
-      <label class="form-label" for="">Title Location</label>
-      <input
-        type="text"
-        name="place[title]"
-        id=""
-        class="form-control"
-        value="<%= places.title %>"
-        required />
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
+  <h1 class="text-center">Add A New Place</h1>
+  <div class="row mb-5">
+    <div class="col-6 <%= !places.images.length ? 'offset-3' : '' %>">
+      <form class="validate-form" novalidate action="/places/update/<%= places._id %>?_method=PUT" method="post"
+        enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label" for="">Title Location</label>
+          <input type="text" name="place[title]" id="" class="form-control" value="<%= places.title %>" required />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please fill out this field.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="price" class="form-control">Price</label>
+          <input type="number" name="place[price]" value="<%= places.price %>" class="form-control" required />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please fill out this field.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="image">Location</label>
+          <input type="text" name="place[location]" value="<%= places.location %>" class="form-control" required />
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please fill out this field.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="image">Image</label>
+          <input type="file" name="image" accept="image/*" class="form-control" multiple id="">
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please fill out this field.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="description">Description</label>
+          <textarea name="place[description]" id="" cols="30" rows="5" class="form-control" required>
+    <%= places.description %></textarea>
+          <div class="valid-feedback">Looks good!</div>
+          <div class="invalid-feedback">Please fill out this field.</div>
+        </div>
+        <button type="submit" class="btn btn-info my-3">Update</button>
+      </form>
     </div>
-    <div class="mb-3">
-      <label class="form-label" for="price" class="form-control">Price</label>
-      <input
-        type="number"
-        name="place[price]"
-        value="<%= places.price %>"
-        class="form-control"
-        required />
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="image">Location</label>
-      <input
-        type="text"
-        name="place[location]"
-        value="<%= places.location %>"
-        class="form-control"
-        required />
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="image">Image</label>
-      <input
-        type="text"
-        name="place[image]"
-        value="<%= places.image %>"
-        class="form-control"
-        required />
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="description">Description</label>
-      <textarea
-        name="place[description]"
-        id=""
-        cols="30"
-        rows="10"
-        class="form-control"
-        required>
-<%= places.description %></textarea
-      >
-      <div class="valid-feedback">Looks good!</div>
-      <div class="invalid-feedback">Please fill out this field.</div>
-    </div>
-    <button type="submit" class="btn btn-info my-3">Update</button>
-  </form>
-</div>
 
-<script>
-  // Example starter JavaScript for disabling form submissions if there are invalid fields
-  (() => {
-    "use strict";
+    <div class="col-6">
+      <h5 class="text-center">Delete Image</h5>
+      <div class="for-group form-check">
+        <input type="checkbox" id="chekcAll" class="form-check-input">
+        <label for="" class="form-check-label">Check All</label>
+      </div>
+      <form action="/places/delete/<%= places._id %>/images?_method=DELETE" method="post" class="d-flex flex-wrap gap-1 ">
+        <% places.images.forEach(image=> { %>
+          <div class="col-md-4">
+            <div class="card mb-3">
+              <img src="/image/<%= image.filename %>" class="card-img-top" alt="" id="imageClick-<%= image.filename %>">
+              <div class="card-body">
+                <label for="" class="custom-checkbox">
+                  <input type="checkbox" id="checkbox-<%= image.filename %>" name="images[]" value="<%= image.url %>"
+                    id="checkbox">
+                  <span class="custom-checkbox-text">Pilih</span>
+                </label>
+              </div>`
+            </div>
+          </div>
+          <% }) %>
+            <div class="w-100">
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </div>
+      </form>
+    </div>
+  </div>
 
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-    const forms = document.querySelectorAll(".validate-form");
+  <script>
+    const chekcAll = document.getElementById('chekcAll');
 
-    // Loop over them and prevent submission
-    Array.from(forms).forEach((form) => {
-      form.addEventListener(
-        "submit",
-        (event) => {
-          if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
+    chekcAll.addEventListener('change', function () {
+      const checkbox = document.getElementsByName('images]');
+      for (let i = 0; i < checkbox.length; i++) {
+        checkbox[i].checked = this.checked
+      }
+    })
 
-          form.classList.add("was-validated");
-        },
-        false
-      );
-    });
-  })();
-</script>
+  </script>
