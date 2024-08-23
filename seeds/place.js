@@ -1,14 +1,12 @@
 const mongoose = require('mongoose');
 const Place = require('../model/place');
 const hereMaps = require('../utils/hereMaps');
-const place = require('../model/place');
 
-mongoose.connect('mongodb://127.0.0.1/yelp_clone')
-  .then((result) => {
-    console.log('connected to mongodb')
-  }).catch((err) => {
-    console.log(err)
-  });
+mongoose.connect("mongodb://localhost:27017/bestpoints").then((result) => {
+  console.log("Connected to MongoDB");
+}).catch((err) => {
+  console.log(err);
+});
 
 async function seedPlaces() {
   const places = [
@@ -141,34 +139,38 @@ async function seedPlaces() {
     }
   ]
   try {
-  const newPlace = await Promise.all(places.map(async (place) => {
+    const newPlace = await Promise.all(places.map(async (place) => {
+      try {
+        let geoData = await hereMaps.geometry(place.location);
 
-      let geoData = await hereMaps.geometry(place.location);
-      
-      if (!geoData) {
-      geoData = { type: 'Point', coordinates: [116.32883, -8.90952] };
-    }
-    console.log(geoData);
+        if (!geoData) {
+          geoData = { type: 'Point', coordinates: [116.32883, -8.90952] };
+        }
 
-    return {
-      ...place,
-      author: '66b389d0fdf363fd332bcea0',
-      images: {
-        url: 'public\\image\\image-1724248477833-176606286.png',
-        filename: 'image-1724248477833-176606286.png'
-      },
-      geometry: { ...geoData }
-    };
-    
-  }));
+        console.log('geoData:', geoData);
+
+        return {
+          ...place,
+          author: '66b389d0fdf363fd332bcea0',
+          images: {
+            url: 'public\\image\\image-1724248477833-176606286.png',
+            filename: 'image-1724248477833-176606286.png'
+          },
+          geometry: { ...geoData }
+        };
+      } catch (geoError) {
+        console.error(`Error fetching geoData for ${place.title}:`, geoError);
+        throw new Error(`GeoData fetch failed for ${place.title}`);
+      }
+    }));
+
     console.log('Deleting all existing places...');
     await Place.deleteMany({});
     console.log('Inserting new places...');
     await Place.insertMany(newPlace);
     console.log('Data berhasil disimpan');
   } catch (error) {
-    //  new ExpressError(`Error while processing place ${place.title}`, 500);
-    console.error(error);
+    console.error('Error during seeding:', error);
   } finally {
     mongoose.disconnect();
   }

@@ -118,8 +118,9 @@
             <% } %>
     </div>
   </div>
+  <div id="place-data" data-place="<%= JSON.stringify(places) %>"></div>
   <script>
-    const place = <%- JSON.stringify(places) %>;
+    const place = JSON.parse(document.getElementById("place-data").dataset.place);
     const placeLocation = { lng: place.geometry.coordinates[0], lat: place.geometry.coordinates[1] };
   </script>
 

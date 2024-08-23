@@ -1,5 +1,6 @@
 const Place = require("../model/place");
 const fs = require("fs");
+const path = require("path");
 
 // !!import utils 
 const hereMaps = require("../utils/hereMaps");
@@ -7,11 +8,21 @@ const hereMaps = require("../utils/hereMaps");
 // !! import middleware error handler
 const wrapAsync = require("../utils/wrapAsync");
 const ExpressError = require("../utils/ExpressError");
+const { json } = require("express");
 
 
 exports.getPlaces = wrapAsync(async (req, res) => {
     const places = await Place.find();
-    res.render("places/index", { places });
+    const clusteringPlace = places.map(place => {
+        return {
+            latitude: place.geometry.coordinates[1],
+            longitude:  place.geometry.coordinates[0]
+        }
+    })
+    
+    const clusteredPlace = JSON.stringify(clusteringPlace);
+
+    res.render("places/index", { places, clusteredPlace });
 })
 
 exports.createPlace = (req, res) => {
@@ -23,10 +34,10 @@ exports.storePlace = wrapAsync(async (req, res) => {
         url: file.path,
         filename: file.filename
     }))
-    
+
     const geoData = await hereMaps.geometry(req.body.place.location);
 
-    
+
     const places = new Place(req.body.place);
 
     places.author = (req.user._id);
@@ -61,15 +72,17 @@ exports.editPlace = wrapAsync(async (req, res) => {
 
 exports.updatePlace = wrapAsync(async (req, res) => {
     const { id } = req.params;
-    const places = await Place.findByIdAndUpdate(id, {
-        ...req.body.place
+    const { place } = req.body;
+    const geoData = await hereMaps.geometry(place.location);
+
+    const newPlace = await Place.findByIdAndUpdate(id, {
+        ...place,
+        geometry: geoData
     });
-
-
 
     if (req.files && req.files.length > 0) {
 
-        places.images.forEach(image => {
+        newPlace.images.forEach(image => {
             fs.unlink(image.url, err => new ExpressError(err))
         })
 
@@ -78,11 +91,11 @@ exports.updatePlace = wrapAsync(async (req, res) => {
             filename: file.filename
         }))
 
-        places.images = imageUpload;
-        await places.save();
+        newPlace.images = imageUpload;
     }
+    await newPlace.save();
     req.flash("success", "Place updated");
-    res.redirect(`/places/${places._id}`);
+    res.redirect(`/places/${newPlace._id}`);
 });
 
 exports.destroyPlace = wrapAsync(async (req, res) => {

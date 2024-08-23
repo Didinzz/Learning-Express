@@ -17,9 +17,9 @@ const upload = require('../config/multer');
 
 router.get("/", placeController.getPlaces);
 
-router.get("/create",  placeController.createPlace);
+router.get("/create", isAuth,  placeController.createPlace);
 
-router.post("/store",  upload.array('image', 5), validatePlace, placeController.storePlace);
+router.post("/store", isAuth,  upload.array('image', 5), validatePlace, placeController.storePlace);
 
 
 router.get("/:id", validObjectId('/places'), placeController.showPlace);
